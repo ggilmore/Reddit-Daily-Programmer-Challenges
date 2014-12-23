@@ -95,6 +95,7 @@ public class AcronymExpander {
                     String newPartOfInput = acyronymMatcher
                             .replaceAll(expandedAcronym);
                     splitInputArray[i] = newPartOfInput;
+                    break;
                 }
             }
             joiner.add(splitInputArray[i]);
