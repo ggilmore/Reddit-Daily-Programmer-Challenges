@@ -13,6 +13,9 @@ import java.util.Arrays;
  */
 public class Destringifier {
 
+    /**
+     * these are just here to improve readability 
+     */
     private final static char BACKSLASH = '\\';
     private final static char NEWLINE = 'n';
     private final static char SINGLE_QUOTE = '\'';
@@ -22,12 +25,21 @@ public class Destringifier {
     private final static char TAB = 't';
     private final static char FORMFEED = 'f';
 
+    /*
+     * Internal state of the reader. 
+     */
     private enum State {
         OUTSIDE_SEQUENCE, INSIDE_SQUENCE
     }
-
+    
+    /**
+     * The reader's status is outside_sequence if we aren't currently within an escape sequence, is inside_sequence otherwise 
+     */
     private State status = State.OUTSIDE_SEQUENCE;
-
+    
+    /**
+     * Creates a new Destringifier instance. 
+     */
     public Destringifier() {
 
     }
@@ -88,6 +100,7 @@ public class Destringifier {
                     break;
                 default: // if this isn't one of the escape sequences that Java
                          // supports, throw an exception:
+                    this.status = State.OUTSIDE_SEQUENCE;
                     throw new RuntimeException(
                             "Invalid escape sequence. You gave me \\"
                                     + character);
@@ -101,8 +114,10 @@ public class Destringifier {
                                                    // the escape sequence wasn't
                                                    // closed properly and so we
                                                    // must throw an exception.
+            this.status = State.OUTSIDE_SEQUENCE;
             throw new RuntimeException("Did not close ecape sequence properly.");
         }
+        this.status = State.OUTSIDE_SEQUENCE;
         return outputString.toString();
     }
     
