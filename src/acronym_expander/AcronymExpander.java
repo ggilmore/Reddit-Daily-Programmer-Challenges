@@ -1,6 +1,7 @@
 package acronym_expander;
 
 import java.io.ObjectOutputStream.PutField;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -13,16 +14,16 @@ public class AcronymExpander {
     /*
      * Set up all the regex's
      */
-    private static final Pattern lol = Pattern.compile("lol");
-    private static final Pattern dw = Pattern.compile("dw");
-    private static final Pattern hf = Pattern.compile("hf");
-    private static final Pattern gg = Pattern.compile("gg");
-    private static final Pattern brb = Pattern.compile("brb");
-    private static final Pattern g2g = Pattern.compile("g2g");
-    private static final Pattern wtf = Pattern.compile("wtf");
-    private static final Pattern wp = Pattern.compile("wp");
-    private static final Pattern gl = Pattern.compile("gl");
-    private static final Pattern imo = Pattern.compile("imo");
+    private static final Pattern lol = Pattern.compile("\\blol\\b");
+    private static final Pattern dw = Pattern.compile("\\bdw\\b");
+    private static final Pattern hf = Pattern.compile("\\bhf\\b");
+    private static final Pattern gg = Pattern.compile("\\bgg\\b");
+    private static final Pattern brb = Pattern.compile("\\bbrb\\b");
+    private static final Pattern g2g = Pattern.compile("\\bg2g\\b");
+    private static final Pattern wtf = Pattern.compile("\\bwtf\\b");
+    private static final Pattern wp = Pattern.compile("\\bwp\\b");
+    private static final Pattern gl = Pattern.compile("\\bgl\\b");
+    private static final Pattern imo = Pattern.compile("\\bimo\\b");
 
     /*
      * set up the mapping from acronyms to their expanded forms
@@ -44,7 +45,7 @@ public class AcronymExpander {
 
     /**
      * If the input string contains any acronyms (listed below), they will
-     * replaced by their expanded forms (described below)
+     * replaced by their expanded forms (described below).
      * 
      * (acroynm) - (thing the acroynm will be replaced by)
      * 
@@ -69,42 +70,34 @@ public class AcronymExpander {
      * "imo" - "in my opinion"
      * 
      * @param inputString
-     *            the string that is getting it's acroynms replaced, if any 
+     *            the string that is getting it's acroynms replaced, if any
      * @return inputString with all of it's acroynms replaced, if any
      */
     public static String replaceAcryonm(String inputString) {
-        String[] splitInputArray = inputString.split(" "); // split up the input
-                                                           // into the different
-                                                           // parts that are
-                                                           // separated by
-                                                           // spaces
-        
-        StringJoiner joiner = new StringJoiner(" "); // used to re-create the
-                                                     // input string (with all
-                                                     // the acronyms replaced)
-        
-        for (int i = 0; i < splitInputArray.length; i++) {
-            String partOfInput = splitInputArray[i];
-            for (Pattern acronym : acroynmMapping.keySet()) {
-                Matcher acyronymMatcher = acronym.matcher(partOfInput);
-                if (acyronymMatcher.find()) { // if the acronym is a substring
-                                              // of partOfInput, the substring
-                                              // will replaced with it's
-                                              // expanded form
-                    String expandedAcronym = acroynmMapping.get(acronym);
-                    String newPartOfInput = acyronymMatcher
-                            .replaceAll(expandedAcronym);
-                    splitInputArray[i] = newPartOfInput;
-                    break;
-                }
+        StringBuilder outputString = new StringBuilder();
+        outputString.append(inputString); // preload the strinbuilder with the
+                                          // whole string
+        /*
+         * Now we iterate through every acronym and see if it exists inside the
+         * given inputString. If so, we replace the acronym with it's expanded
+         * form inside the stringBuilder.
+         * 
+         */
+        for (Pattern acronym : acroynmMapping.keySet()) {
+            Matcher acronymMatcher = acronym.matcher(outputString.toString());
+            while (acronymMatcher.find()) {
+                int beginningOfAcronymLocation = acronymMatcher.start();
+                int endOfAcronymLocation = acronymMatcher.end();
+                String expandedAcronym = acroynmMapping.get(acronym);
+                outputString.replace(beginningOfAcronymLocation, endOfAcronymLocation, expandedAcronym);
             }
-            joiner.add(splitInputArray[i]);
         }
-        return joiner.toString();
-    };
+        return outputString.toString();
+    }
 
     public static void main(String[] args) {
-        System.out.println(replaceAcryonm("imo that was wp. Anyway I've g2g"));
+        System.out
+                .println(replaceAcryonm("imo that was wp.gg.Anyway, I've g2g"));
 
     }
 
