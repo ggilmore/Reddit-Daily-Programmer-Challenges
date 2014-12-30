@@ -123,6 +123,6 @@ public class Destringifier {
     
     public static void main(String[] args) {
         Destringifier destringifier = new Destringifier();
-        System.out.println(destringifier.removeEscapeSequencesFromStringLiteral("lorem ipsum dolor sit amet \\\\"));
+        System.out.println(destringifier.removeEscapeSequencesFromStringLiteral("\"\\\""));
     }
 }

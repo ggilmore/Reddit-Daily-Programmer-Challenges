@@ -81,7 +81,6 @@ public class AcronymExpander {
          * Now we iterate through every acronym and see if it exists inside the
          * given inputString. If so, we replace the acronym with it's expanded
          * form inside the stringBuilder.
-         * 
          */
         for (Pattern acronym : acroynmMapping.keySet()) {
             Matcher acronymMatcher = acronym.matcher(outputString.toString());
@@ -89,7 +88,8 @@ public class AcronymExpander {
                 int beginningOfAcronymLocation = acronymMatcher.start();
                 int endOfAcronymLocation = acronymMatcher.end();
                 String expandedAcronym = acroynmMapping.get(acronym);
-                outputString.replace(beginningOfAcronymLocation, endOfAcronymLocation, expandedAcronym);
+                outputString.replace(beginningOfAcronymLocation,
+                        endOfAcronymLocation, expandedAcronym);
             }
         }
         return outputString.toString();
