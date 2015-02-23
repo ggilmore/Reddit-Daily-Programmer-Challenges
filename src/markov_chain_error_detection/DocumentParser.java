@@ -1,10 +1,13 @@
 package markov_chain_error_detection;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,44 +19,34 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * T
+ * 
+ * @author gmgilmore
+ *
+ */
 public class DocumentParser {
 
     private final File documentFile; // RI: must exist, not null
-    private final Map<Character, Map<Character, Integer>> markovChainMatrix; // RI:
-                                                                             // must
-                                                                             // contain
-                                                                             // 26
-                                                                             // entries,
-                                                                             // one
-                                                                             // for
-                                                                             // each
-                                                                             // letter
-                                                                             // in
-                                                                             // the
-                                                                             // english
-                                                                             // alphabet;
-    private final Map<Character, Map<Character, Double>> transitionProbability; // RI:
-                                                                                // must
-                                                                                // contain
-                                                                                // 26
-                                                                                // entries,
-                                                                                // one
-                                                                                // for
-                                                                                // each
-                                                                                // letter
-                                                                                // in
-                                                                                // english
-                                                                                // alphabet,
-                                                                                // all
-                                                                                // probabilities
-                                                                                // must
-                                                                                // be
-                                                                                // <=1
+    private final Map<Character, Map<Character, Integer>> markovChainMatrix;
+    /*
+     * RI: must contain 26 entries, one for each letter in english alphabet
+     */
+    private final Map<Character, Map<Character, Double>> transitionProbability;
+    /*
+     * RI: must contain 26 entries, one for each letter in english alphabet,
+     * each probability must be <=1
+     */
     private final static String LETTERS = "abcdefghijklmnopqrstuvwxyz";
+
+    private final static String FILE_LIST_NAME = "ParsedFiles.txt";
+    
+    private final static String MARKOV_CHAIN_MATRIX_NAME = "MarkovChainMatrixData.mcm";
 
     public DocumentParser(File file) {
         this.documentFile = file;
         this.markovChainMatrix = parseFile(this.documentFile);
+        
         Map<Character, Map<Character, Double>> transitionProbabilitiesForEveryLetter = new HashMap<Character, Map<Character, Double>>();
         for (char letter : markovChainMatrix.keySet()) {
             Map<Character, Double> transitionProbabilitiesForOneLetter = this
@@ -61,11 +54,72 @@ public class DocumentParser {
             transitionProbabilitiesForEveryLetter.put(letter,
                     transitionProbabilitiesForOneLetter);
         }
-
+        
         this.transitionProbability = Collections
                 .unmodifiableMap(transitionProbabilitiesForEveryLetter);
         checkRep();
     }
+    
+    private boolean isFileParsed(String filePathToCheck){
+        File parsedFiles = new File(
+                "src/markov_chain_error_detection/Resources/DocumentParserData/"
+                        + FILE_LIST_NAME);
+        if (parsedFiles.exists()){
+            try {
+                BufferedReader reader = new BufferedReader(new FileReader(parsedFiles));
+                String fileLine = reader.readLine();
+                while (fileLine != null){
+                    String trimmedFileLine = fileLine.trim();
+                    if (trimmedFileLine.equals(filePathToCheck)){
+                        return true;
+                    }
+                }
+                return false;
+            } catch (FileNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                throw new RuntimeException("FileNotFoundExcepion: "+e);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                throw new RuntimeException("IOException: "+e);
+            }
+        }
+        else{
+            return false;
+        }
+    }
+    
+    private void updateParsedFileList(String filePathToAdd){
+        File parsedFiles = new File(
+                "src/markov_chain_error_detection/Resources/DocumentParserData/"
+                        + FILE_LIST_NAME);
+        if (parsedFiles.exists()){
+            try {
+                BufferedWriter out = new BufferedWriter(new FileWriter(parsedFiles, true));
+                out.newLine();
+                out.write(filePathToAdd);
+                out.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        else{
+            try {
+                BufferedWriter out = new BufferedWriter(new FileWriter(parsedFiles));
+                out.write(filePathToAdd);
+                out.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                
+            }
+            
+        }
+    }
+    
+    
 
     /**
      * asserts the rep invariants stated above
@@ -85,6 +139,18 @@ public class DocumentParser {
 
     }
 
+    /**
+     * Returns a mapping between char
+     * 
+     * @param letterToTransitionFrom
+     *            the letter that we are transitioning from
+     * @return a map, where each key that is a letter (letterToTransitionTo) in
+     *         the English alphabet, and its corresponding value is the
+     *         probability of transitioning from "letterToTransitionFrom" to
+     *         "letterToTransitionTo". There are 26 key-value pairs in this map,
+     *         1 for every letter in the english alphabet.
+     * 
+     */
     public Map<Character, Double> getTransitionProbilitesForThisLetter(
             char letterToTransitionFrom) {
         assert Arrays.asList(this.LETTERS.toCharArray()).contains(
@@ -206,7 +272,7 @@ public class DocumentParser {
             // System.out.println("need to restart at top of loop: " +
             // needToRestart);
             outer: for (String word : wordList) {
-//                System.out.println("word: " + word);
+                // System.out.println("word: " + word);
                 boolean badProbability = detector.isMisspelled(word,
                         probability);
                 if (badProbability) {
@@ -250,6 +316,15 @@ public class DocumentParser {
                 letterThatComesAfterBaseLetter);
     }
 
+    /**
+     * private helper method used to make sure that inputs to various methods
+     * are lowercase english letters
+     * 
+     * @param inputCharacter
+     *            the character to test
+     * @return true if the character is a lowercase english character, false
+     *         otherwise
+     */
     private static boolean checkInputLowercaseLetter(char inputCharacter) {
         return Arrays.asList(LETTERS.toCharArray()).contains(inputCharacter);
         // assert input is a lowercase alphabet

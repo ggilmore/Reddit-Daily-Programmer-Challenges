@@ -1,6 +1,8 @@
 package destringification;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This is my solution to the 12/22/2014 Reddit Daily Programmer Challenge.
@@ -16,6 +18,7 @@ public class Destringifier {
     /**
      * these are just here to improve readability 
      */
+    
     private final static char BACKSLASH = '\\';
     private final static char NEWLINE = 'n';
     private final static char SINGLE_QUOTE = '\'';
@@ -24,7 +27,15 @@ public class Destringifier {
     private final static char BACKSPACE = 'b';
     private final static char TAB = 't';
     private final static char FORMFEED = 'f';
-
+    
+    private final Map<Character, Character> escapeSequenceMapping = new HashMap<Character, Character>(){
+        {
+            put(BACKSLASH, BACKSLASH);
+            put(NEWLINE, '\n');
+            put(SINGLE_QUOTE, SINGLE_QUOTE);
+        }
+        
+    };
     /*
      * Internal state of the reader. 
      */
